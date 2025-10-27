@@ -74,4 +74,4 @@ mlflow ui
 
 ## 👨‍💻 Autor
 
-[Tu Nombre]
+[Juan Felipe Ramirez Botero]
