@@ -1,0 +1,48 @@
+﻿name: ML Pipeline CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  ml-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v3
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: 📦 Install dependencies
+      run: |
+        pip install --upgrade pip setuptools wheel
+        pip install pandas numpy scikit-learn mlflow pyyaml pytest flake8 requests
+    
+    - name: 🔍 Lint code
+      run: |
+        flake8 src/ --max-line-length=100 --ignore=E501,W503 || true
+      continue-on-error: true
+    
+    - name: 🧪 Run tests
+      run: pytest tests/ -v --tb=short
+    
+    - name: 🚀 Train model
+      run: python src/train.py
+    
+    - name: 📊 Upload MLflow artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: mlflow-artifacts
+        path: mlruns/
+        retention-days: 30
+    
+    - name: ✅ Pipeline completed
+      run: echo "🎉 ML Pipeline ejecutado exitosamente"
